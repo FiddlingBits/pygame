@@ -16,29 +16,24 @@ WHITE = (255, 255, 255)
 
 # Display
 DISPLAY_HEIGHT = 500
+DISPLAY_HEIGHT_CENTER = DISPLAY_HEIGHT / 2
 DISPLAY_MARGIN = 25
-DISPLAY_WIDTH = 500
+DISPLAY_WIDTH = 1000
 
 # Font
 FONT = "arial"
 FONT_SIZE = 18
 
-# Orbit
-ORBIT_CENTER_X = DISPLAY_WIDTH / 2
-ORBIT_CENTER_Y = DISPLAY_HEIGHT / 2
-ORBIT_FREQUENCY = 0.25
-ORBIT_OBJECT_RADIUS = 10
-if DISPLAY_HEIGHT <= DISPLAY_WIDTH:
-    ORBIT_RADIUS = (DISPLAY_HEIGHT - (2 * DISPLAY_MARGIN)) / 2
-else:
-    ORBIT_RADIUS = (DISPLAY_WIDTH - (2 * DISPLAY_MARGIN)) / 2
+# Sine Wave
+SINE_WAVE_AMPLITUDE = DISPLAY_HEIGHT_CENTER - DISPLAY_MARGIN
+SINE_WAVE_FREQUENCY = 1.0
+SINE_WAVE_OBJECT_RADIUS = 10
+SINE_WAVE_X_RANGE = DISPLAY_WIDTH - (2 * DISPLAY_MARGIN)
+SINE_WAVE_X_TIME_OFFSET = 1.0 / SINE_WAVE_X_RANGE # 1.0 (One Second)
 
 ####################################################################################################
 # Functions
 ####################################################################################################
-
-def get_cosine_point(amplitude, frequency, time):
-    return amplitude * math.cos(2 * math.pi * frequency * time)
 
 def get_sine_point(amplitude, frequency, time):
     return amplitude * math.sin(2 * math.pi * frequency * time)
@@ -53,11 +48,12 @@ def round_to_integer(number):
 # Set Up
 color = ["Red", "Yellow", "Green", "Cyan", "Blue", "Magenta"]
 color_index = 0
-frequency = ORBIT_FREQUENCY
-hue = [i for i in range(256)]
+frequency = SINE_WAVE_FREQUENCY
+hue = []
 radius = []
-for i in range(256):
-    radius.append(round_to_integer(ORBIT_OBJECT_RADIUS * i / 255))
+for i in range(SINE_WAVE_X_RANGE):
+    hue.append(round_to_integer(255 * i / (SINE_WAVE_X_RANGE - 1)))
+    radius.append(round_to_integer(SINE_WAVE_OBJECT_RADIUS * i / (SINE_WAVE_X_RANGE - 1)))
 time_seconds = 0.0
 
 # Initialize PyGame
@@ -65,7 +61,7 @@ pygame.init()
 
 # Initialize Display
 display = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
-pygame.display.set_caption("Orbit")
+pygame.display.set_caption("Sine Wave")
 
 # Initialize Clock
 clock = pygame.time.Clock()
@@ -92,9 +88,9 @@ while True:
             if event.key == pygame.K_RIGHT:
                 color_index = (color_index + 1) % len(color)
             if event.key == pygame.K_UP:
-                frequency += ORBIT_FREQUENCY
+                frequency += SINE_WAVE_FREQUENCY
             if event.key == pygame.K_DOWN:
-                frequency -= ORBIT_FREQUENCY
+                frequency -= SINE_WAVE_FREQUENCY
     
     # Fill Display
     display.fill(BLACK)
@@ -108,17 +104,17 @@ while True:
     # Get Time
     time_seconds += clock.tick() / 1000.0
     
-    # Get Orbit
-    orbit = []
-    for i in range(256):
-        time_offset = (255 - i) / 1000
-        x = round_to_integer(get_cosine_point(ORBIT_RADIUS, frequency, time_seconds - time_offset) + ORBIT_CENTER_X)
-        y = round_to_integer(ORBIT_CENTER_Y - get_sine_point(ORBIT_RADIUS, frequency, time_seconds - time_offset))
-        orbit.append((x, y))
+    # Get Sine Wave
+    sine_wave = []
+    for i in range(SINE_WAVE_X_RANGE):
+        time_offset = ((SINE_WAVE_X_RANGE - 1) - i) * SINE_WAVE_X_TIME_OFFSET
+        x = round_to_integer(DISPLAY_MARGIN + i)
+        y = round_to_integer(DISPLAY_HEIGHT_CENTER - get_sine_point(SINE_WAVE_AMPLITUDE, frequency, time_seconds - time_offset))
+        sine_wave.append((x, y))
     
     # Get Working Color
     working_color = []
-    for i in range(256):
+    for i in range(SINE_WAVE_X_RANGE):
         if color[color_index] == "Red":
             working_color.append((hue[i], 0, 0))
         elif color[color_index] == "Yellow":
@@ -135,9 +131,9 @@ while True:
     # Lock Display
     display.lock() # Lock Display So PyGame Doesn't Have To Inefficiently Lock And Unlock Display With Each Call To pygame.draw.circle(...)
     
-    # Draw Orbit Object And Tail
-    for i in range(256):
-        pygame.draw.circle(display, working_color[i], orbit[i], radius[i])
+    # Draw Sine Wave Object And Tail
+    for i in range(SINE_WAVE_X_RANGE):
+        pygame.draw.circle(display, working_color[i], sine_wave[i], radius[i])
     
     # Unlock Display
     display.unlock()
