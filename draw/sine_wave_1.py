@@ -61,7 +61,7 @@ pygame.init()
 
 # Initialize Display
 display = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
-pygame.display.set_caption("Sine Wave")
+pygame.display.set_caption("Sine Wave 1")
 
 # Initialize Clock
 clock = pygame.time.Clock()
@@ -94,12 +94,6 @@ while True:
     
     # Fill Display
     display.fill(BLACK)
-    
-    # Draw Text (Antialias = True)
-    text = font.render("Frequency: {} Hz".format(frequency), True, WHITE)
-    display.blit(text, (0, (0 * FONT_SIZE)))
-    text = font.render("Color: {}".format(color[color_index]), True, WHITE)
-    display.blit(text, (0, (1 * FONT_SIZE)))
     
     # Get Time
     time_seconds += clock.tick() / 1000.0
@@ -137,6 +131,12 @@ while True:
     
     # Unlock Display
     display.unlock()
+    
+    # Draw Text (Antialias = True)
+    text = font.render("Frequency: {} Hz".format(frequency), True, WHITE)
+    display.blit(text, (0, (0 * FONT_SIZE)))
+    text = font.render("Color: {}".format(color[color_index]), True, WHITE)
+    display.blit(text, (0, (1 * FONT_SIZE)))
     
     # Update Display
     pygame.display.update()
